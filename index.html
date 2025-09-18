@@ -1020,18 +1020,32 @@
         hamburger.addEventListener('click', () => {
             navLinks.classList.toggle('active');
         });
+
         // Smooth scroll pro navigaci
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-                if (navLinks.classList.contains('active')) {
-                    navLinks.classList.remove('active');
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    // Uzavření hamburger menu
+                    if (navLinks.classList.contains('active')) {
+                        navLinks.classList.remove('active');
+                    }
+                    // Výpočet výšky navigační lišty
+                    const navBar = document.querySelector('nav');
+                    const navBarHeight = navBar ? navBar.offsetHeight : 0;
+                    // Získání pozice cílového elementu
+                    const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+                    // Scrollování s offsetem pro navigační lištu
+                    window.scrollTo({
+                        top: targetPosition - navBarHeight,
+                        behavior: 'smooth'
+                    });
                 }
             });
         });
+
         // Přepínač tříd
         const classToggle = document.querySelector('#class-toggle');
         const switchSpan = document.querySelector('.switch');
@@ -1044,6 +1058,7 @@
                 classToggle.dispatchEvent(new Event('change'));
             });
         }
+
         // Animace sekcí a timeline items při scrollu
         const sections = document.querySelectorAll('section');
         const timelineItems = document.querySelectorAll('.timeline-item');
