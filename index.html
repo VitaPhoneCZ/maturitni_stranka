@@ -1,40 +1,3 @@
-<script type="text/javascript">
-    var gk_isXlsx = false;
-    var gk_xlsxFileLookup = {};
-    var gk_fileData = {};
-    function filledCell(cell) {
-        return cell !== '' && cell != null;
-    }
-    function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                    row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                    headerRowIndex = 0;
-                }
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-    }
-</script>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -44,6 +7,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap"
         rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary-black: #000000;
@@ -266,20 +230,6 @@
                 box-shadow: var(--neon-glow);
             }
         }
-        /* Removed old display toggles
-        .it4b-content {
-            display: block;
-        }
-        .scb-content {
-            display: none;
-        }
-        body.scb-mode .it4b-content {
-            display: none;
-        }
-        body.scb-mode .scb-content {
-            display: block;
-        }
-        */
         section {
             padding: 40px 20px;
             max-width: 1200px;
@@ -573,9 +523,45 @@
     </style>
 </head>
 <body>
+    <script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+            return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+                try {
+                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                    var firstSheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[firstSheetName];
+                    // Convert sheet to JSON to filter blank rows
+                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                    // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                    var filteredData = jsonData.filter(row => row.some(filledCell));
+                    // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                    var headerRowIndex = filteredData.findIndex((row, index) =>
+                        row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                    );
+                    // Fallback
+                    if (headerRowIndex === -1 || headerRowIndex > 25) {
+                        headerRowIndex = 0;
+                    }
+                    // Convert filtered JSON back to CSV
+                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                    return csv;
+                } catch (e) {
+                    console.error(e);
+                    return "";
+                }
+            }
+            return gk_fileData[filename] || "";
+        }
+    </script>
     <header>
-        <h1>Pařba ve Vegas</h1>
-        <h1>Maturitní Ples 2025</h1>
+        <h1>Maturitní ples 2025: Pařba ve Vegas</h1>
     </header>
     <nav>
         <div class="hamburger">☰</div>
@@ -586,7 +572,7 @@
             <a href="#ceny">Ceny lístků</a>
             <a href="#social">Sociální sítě</a>
             <a href="#videa">Videa z nácviku</a>
-            <a href="#timeline">Timeline</a>
+            <a href="#timeline">Časový harmonogram</a>
             <a href="#sponzori">Sponzoři</a>
             <a href="#kontakt">Kontakt</a>
         </div>
@@ -596,7 +582,7 @@
         <p>Datum: 15. května 2025</p>
         <p>Místo: Hotel Casino Las Vegas Style, Praha</p>
         <p>Kdo: Absolventi IT4B a 4SCB a jejich hosté</p>
-        <p>Proč: Oslava maturity v duchu legendárního filmu – plná adrenalinu, hudby a přátelství.</p>
+        <p>Proč: Oslava maturity inspirovaná legendárním filmem – plná adrenalinu, hudby a přátelství.</p>
     </section>
     <section id="program">
         <h2>Program večera</h2>
@@ -610,63 +596,63 @@
             <tbody>
                 <tr>
                     <td>19:30</td>
-                    <td>Lidi in</td>
+                    <td>Příchozí</td>
                 </tr>
                 <tr>
-                    <td>20:00 - 20:15</td>
-                    <td>START</td>
+                    <td>20:00–20:15</td>
+                    <td>Úvodní představení</td>
                 </tr>
                 <tr>
-                    <td>20:15 - 20:20</td>
-                    <td>START INTRA</td>
+                    <td>20:15–20:20</td>
+                    <td>Zahájení programu</td>
                 </tr>
                 <tr>
-                    <td>20:20 - 20:45</td>
-                    <td>NASTUP A TANCOVANI</td>
+                    <td>20:20–20:45</td>
+                    <td>Nástup a tančení</td>
                 </tr>
                 <tr>
-                    <td>20:45 - 21:30</td>
-                    <td>VOLNA ZABAVA</td>
+                    <td>20:45–21:30</td>
+                    <td>Volná zábava</td>
                 </tr>
                 <tr>
-                    <td>21:30 - 23:00</td>
-                    <td>SERPOVANI</td>
+                    <td>21:30–23:00</td>
+                    <td>Šerpování</td>
                 </tr>
                 <tr>
-                    <td>23:00 - 23:10</td>
-                    <td>PROSLOV PODEKOVANI UCITELE</td>
+                    <td>23:00–23:10</td>
+                    <td>Proslov a poděkování učitelům</td>
                 </tr>
                 <tr>
-                    <td>23:10 - 23:30</td>
-                    <td>VOLNA ZABAVA</td>
+                    <td>23:10–23:30</td>
+                    <td>Volná zábava</td>
                 </tr>
                 <tr>
-                    <td>23:30 - 23:40</td>
-                    <td>JUST DANCE</td>
+                    <td>23:30–23:40</td>
+                    <td>Just Dance</td>
                 </tr>
                 <tr>
-                    <td>23:40 - 00:00</td>
-                    <td>VOLNA ZABAVA / DJ</td>
+                    <td>23:40–00:00</td>
+                    <td>Volná zábava / DJ</td>
                 </tr>
                 <tr>
-                    <td>00:00 - 00:20</td>
-                    <td>PULNOČNI PREDSTAVENI</td>
+                    <td>00:00–00:20</td>
+                    <td>Půlnoční představení</td>
                 </tr>
                 <tr>
-                    <td>00:20 - 00:45</td>
-                    <td>PREDTANCENI VOL.2</td>
+                    <td>00:20–00:45</td>
+                    <td>Předtaneční vol. 2</td>
                 </tr>
                 <tr>
-                    <td>00:45 - 00:50</td>
-                    <td>UKONCOVACI VIDEO + UKONCENI MATURAKOVEHO PROGRAMU</td>
+                    <td>00:45–00:50</td>
+                    <td>Ukončovací video a závěr maturitního programu</td>
                 </tr>
                 <tr>
-                    <td>00:50 - 2:00</td>
-                    <td>DJ DOHRAVA</td>
+                    <td>00:50–02:00</td>
+                    <td>DJ dohrává</td>
                 </tr>
                 <tr>
-                    <td>-</td>
-                    <td>Autobusy na mazec odjíždí v 0:40, 1:00, 1:20</td>
+                    <td>–</td>
+                    <td>Autobusy na afterparty odjíždějí ve 00:40, 01:00, 01:20</td>
                 </tr>
             </tbody>
         </table>
@@ -714,15 +700,14 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>IT Gymnázium Praha: Specializovaná škola na informační technologie a programování s moderním
-                                        vybavením.</td>
+                                    <td>IT Gymnázium Praha: Specializovaná škola zaměřená na informační technologie a programování s moderním vybavením.</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <h2>Učitelé, kteří vás učí</h2>
+                    <h2>Vaši učitelé</h2>
                     <div class="it4b-content">
-                        <p>Kreativní přístup: Naši učitelé jsou jako postavy z Vegas – plní energie a překvapení!</p>
+                        <p>Naši učitelé přinášejí do výuky vášeň a inovace, inspirované energií Las Vegas!</p>
                         <table>
                             <thead>
                                 <tr>
@@ -735,12 +720,12 @@
                                 <tr>
                                     <td>Programování</td>
                                     <td>Pan Novák</td>
-                                    <td>Expert na kódování jako mág v kasinu.</td>
+                                    <td>Expert na kódování, který učí s kouzlem mágů z Vegas.</td>
                                 </tr>
                                 <tr>
                                     <td>Databáze</td>
                                     <td>Paní Horáková</td>
-                                    <td>Správkyně dat s přesností rulety.</td>
+                                    <td>Správkyně dat s přesností krupiéra u rulety.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -778,15 +763,14 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>Strojírenská technická škola Brno: Zaměřená na strojírenství, elektrotechniku a průmyslové
-                                        obory s dlouhou tradicí.</td>
+                                    <td>Strojírenská technická škola Brno: Zaměřená na strojírenství, elektrotechniku a průmyslové obory s dlouholetou tradicí.</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <h2>Učitelé, kteří vás učí</h2>
+                    <h2>Vaši učitelé</h2>
                     <div class="scb-content">
-                        <p>Kreativní přístup: Naši učitelé jsou jako postavy z Vegas – plní energie a překvapení!</p>
+                        <p>Naši učitelé kombinují preciznost a kreativitu, jako hvězdy na jevišti v Las Vegas!</p>
                         <table>
                             <thead>
                                 <tr>
@@ -799,12 +783,12 @@
                                 <tr>
                                     <td>Matematika</td>
                                     <td>Paní Nováková</td>
-                                    <td>Mistrka v kalkulacích jako krupiér v kasinu.</td>
+                                    <td>Mistr v kalkulacích, který učí s přesností krupiéra.</td>
                                 </tr>
                                 <tr>
                                     <td>Fyzika</td>
                                     <td>Pan Dvořák</td>
-                                    <td>Experimentátor s energií jako show v Vegas.</td>
+                                    <td>Experimentátor s energií, jako by připravoval show v Vegas.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -825,11 +809,11 @@
             <tbody>
                 <tr>
                     <td>Stání</td>
-                    <td>350,-</td>
+                    <td>350 Kč</td>
                 </tr>
                 <tr>
                     <td>Sezení</td>
-                    <td>400,-</td>
+                    <td>400 Kč</td>
                 </tr>
             </tbody>
         </table>
@@ -851,90 +835,90 @@
         </div>
     </section>
     <section id="timeline">
-        <h2>Timeline večera</h2>
+        <h2>Časový harmonogram</h2>
         <div class="timeline">
             <div class="timeline-item left">
                 <div class="content">
                     <h3>19:30</h3>
-                    <p>Lidi in</p>
+                    <p>Příchozí</p>
                 </div>
             </div>
             <div class="timeline-item right">
                 <div class="content">
-                    <h3>20:00 - 20:15</h3>
-                    <p>START</p>
+                    <h3>20:00–20:15</h3>
+                    <p>Úvodní představení</p>
                 </div>
             </div>
             <div class="timeline-item left">
                 <div class="content">
-                    <h3>20:15 - 20:20</h3>
-                    <p>START INTRA</p>
+                    <h3>20:15–20:20</h3>
+                    <p>Zahájení programu</p>
                 </div>
             </div>
             <div class="timeline-item right">
                 <div class="content">
-                    <h3>20:20 - 20:45</h3>
-                    <p>NASTUP A TANCOVANI</p>
+                    <h3>20:20–20:45</h3>
+                    <p>Nástup a tančení</p>
                 </div>
             </div>
             <div class="timeline-item left">
                 <div class="content">
-                    <h3>20:45 - 21:30</h3>
-                    <p>VOLNA ZABAVA</p>
+                    <h3>20:45–21:30</h3>
+                    <p>Volná zábava</p>
                 </div>
             </div>
             <div class="timeline-item right">
                 <div class="content">
-                    <h3>21:30 - 23:00</h3>
-                    <p>SERPOVANI</p>
+                    <h3>21:30–23:00</h3>
+                    <p>Šerpování</p>
                 </div>
             </div>
             <div class="timeline-item left">
                 <div class="content">
-                    <h3>23:00 - 23:10</h3>
-                    <p>PROSLOV PODEKOVANI UCITELE</p>
+                    <h3>23:00–23:10</h3>
+                    <p>Proslov a poděkování učitelům</p>
                 </div>
             </div>
             <div class="timeline-item right">
                 <div class="content">
-                    <h3>23:10 - 23:30</h3>
-                    <p>VOLNA ZABAVA</p>
+                    <h3>23:10–23:30</h3>
+                    <p>Volná zábava</p>
                 </div>
             </div>
             <div class="timeline-item left">
                 <div class="content">
-                    <h3>23:30 - 23:40</h3>
-                    <p>JUST DANCE</p>
+                    <h3>23:30–23:40</h3>
+                    <p>Just Dance</p>
                 </div>
             </div>
             <div class="timeline-item right">
                 <div class="content">
-                    <h3>23:40 - 00:00</h3>
-                    <p>VOLNA ZABAVA / DJ</p>
+                    <h3>23:40–00:00</h3>
+                    <p>Volná zábava / DJ</p>
                 </div>
             </div>
             <div class="timeline-item left">
                 <div class="content">
-                    <h3>00:00 - 00:20</h3>
-                    <p>PULNOČNI PREDSTAVENI</p>
+                    <h3>00:00–00:20</h3>
+                    <p>Půlnoční představení</p>
                 </div>
             </div>
             <div class="timeline-item right">
                 <div class="content">
-                    <h3>00:20 - 00:45</h3>
-                    <p>PREDTANCENI VOL.2</p>
+                    <h3>00:20–00:45</h3>
+                    <p>Předtaneční vol. 2</p>
                 </div>
             </div>
             <div class="timeline-item left">
                 <div class="content">
-                    <h3>00:45 - 00:50</h3>
-                    <p>UKONCOVACI VIDEO + UKONCENI MATURAKOVEHO PROGRAMU</p>
+                    <h3>00:45–00:50</h3>
+                    <p>Ukončovací video a závěr maturitního programu</p>
                 </div>
             </div>
             <div class="timeline-item right">
                 <div class="content">
-                    <h3>00:50 - 2:00</h3>
-                    <p>DJ DOHRAVA</p>
+                    <h3>00:50–02:00</h3>
+                    <p>DJ dohrává</p>
                 </div>
             </div>
         </div>
@@ -964,7 +948,7 @@
         <p>Adresa: Gymnázium XYZ, Ulice 123, Praha</p>
     </section>
     <footer>
-        <p>&copy; 2025 Maturitní Ples. Všechna práva vyhrazena.</p>
+        <p>&copy; 2025 Maturitní ples. Všechna práva vyhrazena.</p>
     </footer>
     <script>
         // Ovládání hamburger menu
